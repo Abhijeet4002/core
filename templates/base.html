@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Modern Blog{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <nav class="bg-white shadow-md">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between">
+                <div class="flex space-x-7">
+                    <div>
+                        <a href="{% url 'post_list' %}" class="flex items-center py-4 px-2">
+                            <span class="font-semibold text-gray-500 text-lg">My Blog</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    {% if user.is_authenticated %}
+                        {% if not user.profile.is_subscribed %}
+                            <a href="{% url 'subscribe' %}" class="py-2 px-2 font-medium text-white bg-yellow-500 rounded hover:bg-yellow-400 transition duration-300">Subscribe</a>
+                        {% endif %}
+                        
+                        {% if user.role == 'author' or user.role == 'admin' %}
+                            <a href="{% url 'post_create' %}" class="py-2 px-2 font-medium text-white bg-green-500 rounded hover:bg-green-400 transition duration-300">New Post</a>
+                        {% endif %}
+                        <span class="py-4 px-2 text-gray-500">Welcome, {{ user.username }}</span>
+                        <!-- The Logout Form -->
+                        <form method="post" action="{% url 'logout' %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="py-2 px-2 font-medium text-gray-500 rounded hover:bg-gray-200 transition duration-300">
+                                Logout
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="py-2 px-2 font-medium text-gray-500 rounded hover:bg-gray-200 transition duration-300">Log In</a>
+                        <a href="{% url 'register' %}" class="py-2 px-2 font-medium text-white bg-blue-500 rounded hover:bg-blue-400 transition duration-300">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto py-8 px-4">
+         {% if messages %}
+            {% for message in messages %}
+                <div class="p-4 mb-4 text-sm rounded-lg 
+                    {% if message.tags == 'success' %} bg-green-100 text-green-800 {% endif %}
+                    {% if message.tags == 'error' %} bg-red-100 text-red-800 {% endif %}" 
+                    role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

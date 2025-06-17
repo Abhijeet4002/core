@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Subscribe to Premium{% endblock %}
+
+{% block content %}
+<div class="bg-white p-8 rounded-lg shadow-lg max-w-lg mx-auto text-center">
+    <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Go Premium!</h1>
+    <p class="text-gray-600 mb-6">
+        Unlock all premium articles and gain access to exclusive content by becoming a premium subscriber today.
+    </p>
+
+    <!-- This form submits a POST request to our new view -->
+    <form action="{% url 'process_subscription' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors text-xl">
+            Confirm Subscription
+        </button>
+    </form>
+
+    <p class="text-xs text-gray-400 mt-4">(This is a demo subscription. No payment is required.)</p>
+</div>
+{% endblock %}

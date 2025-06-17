@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+<article class="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto">
+    <h1 class="text-4xl font-extrabold text-gray-900 mb-2">{{ post.title }}</h1>
+    <p class="text-sm text-gray-500 mb-6">By <a href="#" class="text-indigo-600 hover:underline">{{ post.author.username }}</a> on {{ post.created_at|date:"F j, Y" }}</p>
+
+    {% if post.featured_image %}
+        <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="w-full h-auto object-cover rounded-md mb-6">
+    {% endif %}
+
+    <!-- ============================================= -->
+    <!--          *** PAYWALL LOGIC START ***          -->
+    <!-- ============================================= -->
+    {% if paywall %}
+        <!-- FOR NON-SUBSCRIBED USERS VIEWING A PREMIUM POST -->
+        <div class="prose max-w-none text-gray-800">
+            {{ preview|safe }}
+        </div>
+        <div class="mt-8 text-center p-6 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+            <h3 class="text-xl font-bold text-blue-800">This is a Premium Article</h3>
+            <p class="text-blue-600 mt-2">Subscribe now to read the full content and support our authors.</p>
+            <a href="{% url 'subscribe' %}" class="mt-4 inline-block bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition">Go Premium</a>
+        </div>
+    {% else %}
+        <!-- FOR SUBSCRIBED USERS OR ON A FREE POST -->
+        <div class="prose max-w-none text-gray-800">
+            {{ post.body|safe }}
+        </div>
+    {% endif %}
+    <!-- ============================================= -->
+    <!--           *** PAYWALL LOGIC END ***           -->
+    <!-- ============================================= -->
+
+    <hr class="my-6">
+
+    <div class="mt-6 flex items-center justify-between">
+        <button id="like-btn" class="flex items-center space-x-2 text-gray-600 hover:text-red-500 transition {% if user in post.likes.all %}text-red-500{% endif %}">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+            <span id="like-count" class="font-semibold">{{ post.likes.count }}</span>
+        </button>
+        {% if user == post.author %}
+            <div class="space-x-4">
+                <a href="{% url 'post_update' post.slug %}" class="text-blue-500 hover:underline">Edit</a>
+                <a href="{% url 'post_delete' post.slug %}" class="text-red-500 hover:underline">Delete</a>
+            </div>
+        {% endif %}
+    </div>
+</article>
+
+<!-- Comment Section -->
+<section class="mt-8 bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6">Comments ({{ comments.count }})</h2>
+    
+    <!-- Comment Form -->
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'add_comment' post.slug %}">
+        {% csrf_token %}
+        <div class="mb-4">
+            {{ comment_form.body }}
+        </div>
+        <button type="submit" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded hover:bg-indigo-700 transition">Post Comment</button>
+    </form>
+    {% else %}
+    <p>Please <a href="{% url 'login' %}?next={{ request.path }}" class="text-indigo-600 hover:underline font-semibold">login</a> to leave a comment.</p>
+    {% endif %}
+
+    <hr class="my-8">
+
+    <!-- Comment List -->
+    <div id="comment-list" class="space-y-6">
+        {% for comment in comments %}
+        <div class="p-4 bg-gray-50 rounded-lg flex items-start space-x-4">
+            <!-- You can add user avatars here -->
+            <div class="flex-shrink-0 w-10 h-10 bg-gray-300 rounded-full"></div>
+            <div class="flex-grow">
+                <p class="font-semibold">{{ comment.author.username }} <span class="text-sm text-gray-500 font-normal ml-2">{{ comment.created_date|timesince }} ago</span></p>
+                <p class="text-gray-700 mt-1">{{ comment.body|linebreaks }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <p id="no-comments-msg" class="text-gray-500">No comments yet. Be the first to comment!</p>
+        {% endfor %}
+    </div>
+</section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // --- AJAX for Liking a Post ---
+    const likeButton = document.getElementById('like-btn');
+    if (likeButton) {
+        likeButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = "{% url 'like_post' post.slug %}";
+            
+            // We need the CSRF token from the comment form for the POST request
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // Redirect to login if user is not authenticated
+                    if (response.status === 403 || response.status === 401) {
+                        window.location.href = "{% url 'login' %}?next={{ request.path }}";
+                    }
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('like-count').textContent = data.count;
+                if(data.liked) {
+                    this.classList.add('text-red-500');
+                } else {
+                    this.classList.remove('text-red-500');
+                }
+            })
+            .catch(error => console.error('Error liking post:', error));
+        });
+    }
+
+    // --- WebSocket for Live Comments ---
+    const postSlug = '{{ post.slug }}';
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const commentSocket = new WebSocket(
+        protocol + '//' + window.location.host + '/ws/comments/' + postSlug + '/'
+    );
+
+    commentSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const comment = data.comment;
+        
+        const commentList = document.getElementById('comment-list');
+        const noCommentsMsg = document.getElementById('no-comments-msg');
+        if (noCommentsMsg) {
+            noCommentsMsg.remove();
+        }
+
+        // Create the new comment element from the received data
+        const newCommentDiv = document.createElement('div');
+        newCommentDiv.className = 'p-4 bg-gray-50 rounded-lg flex items-start space-x-4 opacity-0 transition-opacity duration-500';
+        newCommentDiv.innerHTML = `
+            <div class="flex-shrink-0 w-10 h-10 bg-gray-300 rounded-full"></div>
+            <div class="flex-grow">
+                <p class="font-semibold">${comment.author} <span class="text-sm text-gray-500 font-normal ml-2">Just now</span></p>
+                <p class="text-gray-700 mt-1">${comment.body.replace(/\n/g, '<br>')}</p>
+            </div>
+        `;
+        
+        // Add new comment at the top of the list and fade it in
+        commentList.prepend(newCommentDiv);
+        setTimeout(() => newCommentDiv.style.opacity = 1, 100);
+    };
+
+    commentSocket.onclose = function(e) {
+        console.error('Comment socket closed unexpectedly. Trying to reconnect...');
+        // Optional: Add reconnection logic here
+    };
+});
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}New Post{% endblock %}
+{% block content %}
+<div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6 text-center">
+        {% if form.instance.pk %}
+            Edit Post
+        {% else %}
+            Create a New Post
+        {% endif %}
+    </h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Save Post</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    {% for post in posts %}
+    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+        <div class="flex justify-between items-start">
+            <h2 class="text-3xl font-bold text-gray-800">
+                <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+            </h2>
+            {% if post.access_level == 'premium' %}
+                <span class="text-xs font-semibold bg-yellow-400 text-yellow-800 px-2 py-1 rounded-full">Premium</span>
+            {% endif %}
+        </div>
+        <p class="text-sm text-gray-500 mt-1">
+            By {{ post.author.username }} on {{ post.publish_date|date:"F d, Y" }}
+        </p>
+        <div class="text-gray-700 mt-4">
+            {{ post.body|truncatewords_html:50|safe }}
+        </div>
+        <div class="mt-4">
+            <a href="{{ post.get_absolute_url }}" class="text-indigo-600 hover:text-indigo-800 font-semibold">Read more →</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="mt-8 flex justify-center">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="mx-1 px-3 py-2 bg-white text-gray-700 rounded-md shadow-sm">Previous</a>
+    {% endif %}
+    <span class="mx-1 px-3 py-2 bg-indigo-500 text-white rounded-md shadow-sm">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="mx-1 px-3 py-2 bg-white text-gray-700 rounded-md shadow-sm">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
