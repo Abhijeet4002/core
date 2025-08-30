@@ -1,18 +1,16 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
-import json
+from django.views.decorators.http import require_POST
+from django.contrib import messages
+from datetime import date, timedelta
 
-from .models import Post, Comment, Like, User
+from .models import Post, Comment, Like, Profile
 from .forms import CommentForm, PostForm, CustomUserCreationForm
 
-
-from django.views.generic import TemplateView
-from django.shortcuts import redirect
-from django.contrib import messages
 
 
 class UserRegisterView(CreateView):
@@ -20,17 +18,6 @@ class UserRegisterView(CreateView):
     template_name = 'registration/register.html'
     success_url = reverse_lazy('login')
 
-from datetime import date, timedelta
-from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.decorators import login_required
-from django.urls import reverse_lazy
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.contrib import messages
-from .models import Post, Comment, Like, Profile
-from .forms import CommentForm, PostForm, CustomUserCreationForm
 
 class PostListView(LoginRequiredMixin, ListView):
     model = Post
@@ -78,6 +65,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class SubscribeView(LoginRequiredMixin, TemplateView):
     template_name = 'blog/subscribe.html'
 
+
 @login_required
 @require_POST
 def process_subscription(request):
@@ -87,6 +75,7 @@ def process_subscription(request):
     profile.save()
     messages.success(request, f"Subscribed until {profile.subscription_end_date:%b %d, %Y}")
     return redirect('post_list')
+
 
 @login_required
 @require_POST
@@ -103,6 +92,7 @@ def add_comment(request, slug):
         }})
     return redirect('post_detail', slug=slug)
 
+
 @login_required
 @require_POST
 def like_post(request, slug):
@@ -111,3 +101,4 @@ def like_post(request, slug):
     if not created: like.delete(); liked=False
     else: liked=True
     return JsonResponse({'liked':liked,'count':post.likes.count()})
+

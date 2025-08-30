@@ -1,12 +1,52 @@
 {% extends 'base.html' %}
 {% block title %}Log In{% endblock %}
 {% block content %}
-<div class="bg-white p-8 rounded-lg shadow-lg max-w-sm mx-auto">
-    <h2 class="text-2xl font-bold mb-6 text-center">Log In</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Log In</button>
-    </form>
+
+<style>
+/* Keep full box AND underline */
+input[type="text"], 
+input[type="email"], 
+input[type="password"] {
+    width: 100%;
+    border: 1px solid #ccc;      /* normal box */
+    border-bottom: 3px solid #333; /* always dark underline */
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: white;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+/* On focus → darken box and line */
+input[type="text"]:focus, 
+input[type="email"]:focus, 
+input[type="password"]:focus {
+    border: 1px solid #2563eb;     
+    border-bottom: 3px solid #2563eb;
+}
+</style>
+
+<div class="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-100 to-indigo-200">
+    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+        <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Log In</h2>
+        
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" 
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg 
+                       hover:bg-blue-700 focus:outline-none 
+                       focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 
+                       transition duration-200 ease-in-out">
+                Log In
+            </button>
+        </form>
+
+        <!-- Extra Links -->
+        <div class="mt-6 text-center text-gray-600 text-sm">
+            Don’t have an account? 
+            <a href="{% url 'register' %}"class="text-blue-600 font-medium hover:underline">Sign Up</a>
+        </div>
+    </div>
 </div>
 {% endblock %}

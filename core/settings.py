@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     # 3rd Party Apps
     'taggit',
     'channels',
-
+    'tailwind',
     # Our Apps
     'blog.apps.BlogConfig',
 ]

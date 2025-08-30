@@ -71,7 +71,7 @@ class Comment(models.Model):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     
     class Meta:
-        ordering = ('created_date',)
+        ordering = ('-created_date',)
     def __str__(self):
         return f'Comment by {self.author} on {self.post}'
 

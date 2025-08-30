@@ -1,18 +1,47 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}New Post{% endblock %}
 {% block content %}
-<div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl mx-auto">
-    <h2 class="text-2xl font-bold mb-6 text-center">
+<div class="min-h-screen bg-gray-50 py-12">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white p-8 rounded-2xl shadow-lg">
+      <h2 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">
         {% if form.instance.pk %}
-            Edit Post
+          ✏️ Edit Post
         {% else %}
-            Create a New Post
+          📝 Create a New Post
         {% endif %}
-    </h2>
-    <form method="post" enctype="multipart/form-data">
+      </h2>
+
+      <form method="post" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Save Post</button>
-    </form>
+
+        {% for field in form %}
+          <div>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              {{ field.label }}
+              {% if field.field.required %}<span class="text-red-500 ml-1">*</span>{% endif %}
+            </label>
+
+            {# Render widget with consistent, large classes; works for text/input/textarea/select/file #}
+            {{ field }}
+
+
+            {% if field.help_text %}
+              <p class="mt-1 text-xs text-gray-500">{{ field.help_text }}</p>
+            {% endif %}
+
+            {% if field.errors %}
+              <p class="mt-1 text-sm text-red-600">{{ field.errors|striptags }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg shadow">
+          Save Post
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %}
