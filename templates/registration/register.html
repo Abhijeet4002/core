@@ -59,7 +59,15 @@
         {% for field in form %}
         <div>
           <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">{{ field.label }}</label>
+          {% if field.name == 'role' %}
+          <select name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="auth-input">
+            {% for value, label in field.field.choices %}
+            <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          {% else %}
           <input type="{{ field.field.widget.input_type|default:'text' }}" name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="auth-input" placeholder="{{ field.label }}" {% if field.value %}value="{{ field.value }}"{% endif %}>
+          {% endif %}
           {% if field.errors %}
           <p class="mt-1 text-sm text-red-500">{{ field.errors|striptags }}</p>
           {% endif %}

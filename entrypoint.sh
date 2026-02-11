@@ -10,8 +10,5 @@ python manage.py collectstatic --noinput
 echo "Creating superuser if needed..."
 python manage.py create_superuser_if_none
 
-echo "Loading initial data if needed..."
-python manage.py load_initial_data
-
 echo "Starting server..."
 exec "$@"
