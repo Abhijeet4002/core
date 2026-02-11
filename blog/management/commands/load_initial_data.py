@@ -1,30 +1,31 @@
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
+from django.conf import settings
 import os
 
 
 class Command(BaseCommand):
-    help = 'Load initial data from fixtures if DB is empty'
+    help = 'Load initial data from fixtures'
+
+    def add_arguments(self, parser):
+        parser.add_argument('--force', action='store_true', help='Force load even if data exists')
 
     def handle(self, *args, **options):
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
+        from blog.models import Post
 
-        # Only load if no regular users exist (superuser might exist from auto-create)
-        if User.objects.filter(is_superuser=False).count() == 0:
-            fixtures_dir = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..')
+        if Post.objects.exists() and not options['force']:
+            self.stdout.write(self.style.SUCCESS('Posts already exist. Skipping. Use --force to reload.'))
+            return
 
-            blog_fixture = os.path.join(fixtures_dir, 'blog_data.json')
-            taggit_fixture = os.path.join(fixtures_dir, 'taggit_data.json')
+        base_dir = settings.BASE_DIR
+        fixture = os.path.join(base_dir, 'all_data.json')
 
-            if os.path.exists(taggit_fixture):
-                self.stdout.write('Loading taggit data...')
-                call_command('loaddata', taggit_fixture)
-
-            if os.path.exists(blog_fixture):
-                self.stdout.write('Loading blog data...')
-                call_command('loaddata', blog_fixture)
-
-            self.stdout.write(self.style.SUCCESS('Data loaded successfully!'))
+        if os.path.exists(fixture):
+            self.stdout.write(f'Loading data from {fixture}...')
+            try:
+                call_command('loaddata', fixture, verbosity=2)
+                self.stdout.write(self.style.SUCCESS('Data loaded successfully!'))
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f'Error loading data: {e}'))
         else:
-            self.stdout.write(self.style.SUCCESS('Data already exists. Skipping.'))
+            self.stdout.write(self.style.WARNING(f'Fixture file not found: {fixture}'))
