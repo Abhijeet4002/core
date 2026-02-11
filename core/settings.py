@@ -125,8 +125,12 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
-# CSRF trusted origins (add your Railway domain)
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000').split(',')
+# CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = [
+    'https://core-production-f1f1.up.railway.app',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
 
 # Only enable after SSL is working
 SECURE_SSL_REDIRECT = False   # TEMP
