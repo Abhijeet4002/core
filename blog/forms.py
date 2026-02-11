@@ -14,6 +14,9 @@ class CustomUserCreationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Remove the blank '-------' option from role dropdown
+        self.fields['role'].choices = User.ROLE_CHOICES
+        self.fields['role'].help_text = 'Choose Author if you want to write posts, or Reader to browse content.'
         for field_name, field in self.fields.items():
             if isinstance(field.widget, forms.Select):
                 field.widget.attrs['class'] = SELECT_CLASSES

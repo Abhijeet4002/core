@@ -60,11 +60,11 @@
         <div>
           <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">{{ field.label }}</label>
           {% if field.name == 'role' %}
-          <select name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="auth-input">
-            {% for value, label in field.field.choices %}
-            <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
+          <select name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="auth-input cursor-pointer">
+            <option value="reader" {% if field.value == 'reader' or not field.value %}selected{% endif %}>📖 Reader — Browse and read posts</option>
+            <option value="author" {% if field.value == 'author' %}selected{% endif %}>✍️ Author — Write and publish posts</option>
           </select>
+          <p class="mt-1.5 text-xs text-gray-400 dark:text-gray-500">Authors can create, edit & delete their own posts. Readers can read, like, comment & bookmark.</p>
           {% else %}
           <input type="{{ field.field.widget.input_type|default:'text' }}" name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="auth-input" placeholder="{{ field.label }}" {% if field.value %}value="{{ field.value }}"{% endif %}>
           {% endif %}

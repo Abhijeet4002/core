@@ -13,6 +13,10 @@ from .models import Post, Comment, Like, Profile, Category, Bookmark
 from .forms import CommentForm, PostForm, CustomUserCreationForm
 
 
+def custom_403(request, exception=None):
+    return render(request, '403.html', status=403)
+
+
 class UserRegisterView(CreateView):
     form_class = CustomUserCreationForm
     template_name = 'registration/register.html'

@@ -21,6 +21,9 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from blog.views import UserRegisterView
 
+# Custom error handler
+handler403 = 'blog.views.custom_403'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
